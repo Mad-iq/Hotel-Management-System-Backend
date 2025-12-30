@@ -9,6 +9,11 @@ import com.hotel.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.hotel.auth.dto.LoginRequest;
+import com.hotel.auth.dto.LoginResponse;
+import com.hotel.auth.entity.User;
+import com.hotel.auth.security.JwtUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Set;
 
@@ -43,5 +48,31 @@ public class AuthService {
         user.setRoles(Set.of(guestRole));
 
         userRepository.save(user);
+    }
+    
+    private final JwtUtil jwtUtil;
+
+    public LoginResponse login(LoginRequest request) {
+
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid username or password");
+        }
+
+        var roles = user.getRoles()
+                .stream()
+                .map(role -> role.getName())
+                .toList();
+
+        String token = jwtUtil.generateToken(user.getUsername(), roles);
+
+        return new LoginResponse(
+                token,
+                "Bearer",
+                86400,
+                roles
+        );
     }
 }
