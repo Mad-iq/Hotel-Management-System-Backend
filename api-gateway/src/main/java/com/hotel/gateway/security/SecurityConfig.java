@@ -20,7 +20,7 @@ public class SecurityConfig {
                     "/api/auth/register",
                     "/api/auth/login"
                 ).permitAll()
-                .anyExchange().authenticated()
+                .anyExchange().permitAll()
             );
 
         return http.build();
