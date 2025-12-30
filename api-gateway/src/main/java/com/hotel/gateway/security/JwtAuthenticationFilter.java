@@ -28,12 +28,10 @@ public class JwtAuthenticationFilter implements WebFilter {
 
         String path = exchange.getRequest().getURI().getPath();
 
-        // 1️⃣ Public endpoints
         if (path.startsWith("/api/auth/")) {
             return chain.filter(exchange);
         }
 
-        // 2️⃣ Extract Authorization header
         String authHeader = exchange.getRequest()
                 .getHeaders()
                 .getFirst(HttpHeaders.AUTHORIZATION);
@@ -43,7 +41,6 @@ public class JwtAuthenticationFilter implements WebFilter {
             return exchange.getResponse().setComplete();
         }
 
-        // 3️⃣ Validate token with Auth Service
         return webClient.get()
                 .uri("lb://auth-service/api/auth/validate")
                 .header(HttpHeaders.AUTHORIZATION, authHeader)
@@ -54,22 +51,22 @@ public class JwtAuthenticationFilter implements WebFilter {
                     @SuppressWarnings("unchecked")
                     List<String> roles = (List<String>) response.get("roles");
 
-                    // 4️⃣ RBAC check
                     if (!isAuthorized(path, roles)) {
                         exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                         return exchange.getResponse().setComplete();
                     }
 
-                    // 5️⃣ Authorized → forward request
                     return chain.filter(exchange);
                 })
-                .onErrorResume(ex -> {
-                    exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                    return exchange.getResponse().setComplete();
-                });
+                .onErrorResume(
+                	    org.springframework.web.reactive.function.client.WebClientResponseException.Unauthorized.class,
+                	    ex -> {
+                	        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                	        return exchange.getResponse().setComplete();
+                	    });
+
     }
 
-    // 🔐 RBAC rules
     private boolean isAuthorized(String path, List<String> roles) {
 
         if (path.startsWith("/api/admin/")) {
@@ -91,7 +88,6 @@ public class JwtAuthenticationFilter implements WebFilter {
             return roles.contains("ROLE_ADMIN") || roles.contains("ROLE_MANAGER");
         }
 
-        // Default: authenticated but unrestricted
         return true;
     }
 }
