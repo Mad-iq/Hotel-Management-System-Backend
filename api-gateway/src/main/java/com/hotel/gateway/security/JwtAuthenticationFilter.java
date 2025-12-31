@@ -69,22 +69,22 @@ public class JwtAuthenticationFilter implements WebFilter {
 
     private boolean isAuthorized(String path, List<String> roles) {
 
-        if (path.startsWith("/api/admin/")) {
+        if (path.startsWith("/api/admin")) {
             return roles.contains("ROLE_ADMIN");
         }
 
-        if (path.startsWith("/api/hotels/")) {
+        if (path.startsWith("/api/hotels")) {
             return roles.contains("ROLE_ADMIN") || roles.contains("ROLE_MANAGER");
         }
 
-        if (path.startsWith("/api/reservations/")) {
+        if (path.startsWith("/api/reservations")) {
             return roles.contains("ROLE_ADMIN")
                     || roles.contains("ROLE_MANAGER")
                     || roles.contains("ROLE_RECEPTIONIST")
                     || roles.contains("ROLE_GUEST");
         }
 
-        if (path.startsWith("/api/billing/")) {
+        if (path.startsWith("/api/billing")) {
             return roles.contains("ROLE_ADMIN") || roles.contains("ROLE_MANAGER");
         }
 
