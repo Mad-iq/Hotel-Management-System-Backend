@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.hotel.booking.client.HotelServiceClient;
 import com.hotel.booking.client.dto.CategoryPricingDto;
@@ -13,6 +12,8 @@ import com.hotel.booking.client.dto.RoomDto;
 import com.hotel.booking.client.dto.SeasonalPricingDto;
 import com.hotel.booking.entities.Booking;
 import com.hotel.booking.entities.BookingStatus;
+import com.hotel.booking.event.BookingEventPublisher;
+import com.hotel.booking.event.dto.BookingCreatedEvent;
 import com.hotel.booking.repository.BookingRepository;
 
 @Service
@@ -21,12 +22,14 @@ public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final HotelServiceClient hotelServiceClient;
+    private final BookingEventPublisher bookingEventPublisher;
 
     public BookingServiceImpl(
             BookingRepository bookingRepository,
-            HotelServiceClient hotelServiceClient) {
+            HotelServiceClient hotelServiceClient,  BookingEventPublisher bookingEventPublisher) {
         this.bookingRepository = bookingRepository;
         this.hotelServiceClient = hotelServiceClient;
+        this.bookingEventPublisher = bookingEventPublisher;
     }
 
 
@@ -79,6 +82,18 @@ public class BookingServiceImpl implements BookingService {
         Booking savedBooking = bookingRepository.save(booking);
 
         hotelServiceClient.updateRoomStatus(hotelId, roomId, "OCCUPIED");
+        
+        BookingCreatedEvent event = new BookingCreatedEvent();
+        event.setBookingId(savedBooking.getId());
+        event.setUserId(savedBooking.getUserId());
+        event.setHotelId(savedBooking.getHotelId());
+        event.setRoomId(savedBooking.getRoomId());
+        event.setCheckInDate(savedBooking.getCheckInDate());
+        event.setCheckOutDate(savedBooking.getCheckOutDate());
+        event.setTotalAmount(savedBooking.getTotalAmount());
+        event.setCreatedAt(savedBooking.getCreatedAt());
+
+        bookingEventPublisher.publishBookingCreated(event);
 
         return savedBooking;
     }
