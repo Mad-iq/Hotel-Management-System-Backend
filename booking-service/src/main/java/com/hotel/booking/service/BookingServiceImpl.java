@@ -142,4 +142,9 @@ public class BookingServiceImpl implements BookingService {
     public List<Booking> getBookingsByUser(Long userId) {
         return bookingRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+    
+    @Override
+    public List<Booking> getAllBookings() {
+        return bookingRepository.findAll();
+    }
 }

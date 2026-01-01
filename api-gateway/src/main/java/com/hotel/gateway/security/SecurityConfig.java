@@ -98,6 +98,9 @@ public class SecurityConfig {
                 	     .pathMatchers("/api/payments/**")
                 	        .hasRole("GUEST")
                 	        
+                	     .pathMatchers("/api/reports/**")
+                	        .hasAnyRole("ADMIN", "MANAGER")
+                	        
                 	    .pathMatchers("/api/billing/**")
                 	        .hasAnyRole("ADMIN", "MANAGER")
 

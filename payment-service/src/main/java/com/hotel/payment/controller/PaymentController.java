@@ -44,7 +44,7 @@ public class PaymentController {
     @GetMapping("/booking/{bookingId}")
     public Payment getPaymentByBooking(
             @PathVariable Long bookingId,
-            @RequestHeader("X-USER-ID") Long userId) {
+            @RequestHeader(value= "X-USER-ID", required = false) Long userId) {
 
         return paymentService.getPaymentByBookingId(bookingId, userId);
     }

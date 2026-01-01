@@ -82,7 +82,7 @@ public class PaymentService {
         Payment payment = paymentRepository.findByBookingId(bookingId)
                 .orElseThrow(() -> new IllegalStateException("Payment not found for this booking"));
 
-        if (!payment.getUserId().equals(userId)) {
+        if (userId != null && !payment.getUserId().equals(userId)) {
             throw new IllegalStateException("You are not allowed to view this payment");
         }
 

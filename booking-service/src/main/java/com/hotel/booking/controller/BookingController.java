@@ -66,4 +66,9 @@ public class BookingController {
 
         return bookingService.getBookingsByUser(userId);
     }
+    
+    @GetMapping
+    public List<Booking> getAllBookings() {
+        return bookingService.getAllBookings();
+    }
 }
