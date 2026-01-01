@@ -54,6 +54,8 @@ public class RoomController {
         RoomResponseDto dto = new RoomResponseDto();
         dto.setId(r.getId());
         dto.setRoomNumber(r.getRoomNumber());
+        dto.setHotelId(r.getHotel().getId());
+        dto.setCategoryId(r.getCategory().getId());
         dto.setStatus(r.getStatus());
         return dto;
     }

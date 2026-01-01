@@ -11,4 +11,6 @@ public class RoomResponseDto {
     private Long id;
     private String roomNumber;
     private RoomStatus status;
+    private Long hotelId;
+    private Long categoryId;
 }
