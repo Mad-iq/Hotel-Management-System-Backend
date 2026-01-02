@@ -4,9 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.hotel.booking.client.dto.CategoryPricingDto;
+import com.hotel.booking.client.dto.HotelDto;
 import com.hotel.booking.client.dto.RoomDto;
 import com.hotel.booking.client.dto.SeasonalPricingDto;
 
@@ -31,5 +35,10 @@ public interface HotelServiceClient {
         @PathVariable Long roomId,
         @RequestParam("status") String status
     );
+    
+    
+    //adding this for the search
+    @GetMapping("/api/hotels")
+    List<HotelDto> getAllHotels();
 }
 

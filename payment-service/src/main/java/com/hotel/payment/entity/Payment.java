@@ -25,15 +25,12 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Reference to Booking Service
     @Column(nullable = false, unique = true)
     private Long bookingId;
 
-    // Copied from booking (ownership validation)
     @Column(nullable = false)
     private Long userId;
 
-    // Copied from booking.totalAmount
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 

@@ -3,6 +3,7 @@ package com.hotel.booking.service;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.hotel.booking.controller.dto.AvailableHotelDto;
 import com.hotel.booking.entities.Booking;
 
 public interface BookingService {
@@ -22,4 +23,15 @@ public interface BookingService {
     List<Booking> getBookingsByUser(Long userId);
     
     List<Booking> getAllBookings();
+    
+    List<AvailableHotelDto> searchAvailableHotels(
+            String city,
+            LocalDate checkIn,
+            LocalDate checkOut,
+            Integer guests
+    );
+    
+    //for receptionist
+    Booking checkIn(Long bookingId);
+    Booking checkOut(Long bookingId);
 }

@@ -58,11 +58,6 @@ public class RoomServiceImpl implements RoomService {
         return roomRepository.findByHotelIdAndActiveTrue(hotelId);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<Room> getRoomsByHotelAndStatus(Long hotelId, RoomStatus status) {
-        return roomRepository.findByHotelIdAndStatusAndActiveTrue(hotelId, status);
-    }
 
     @Override
     public Room updateRoomStatus(Long roomId, RoomStatus status) {

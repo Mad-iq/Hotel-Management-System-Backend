@@ -10,5 +10,6 @@ public interface RoomCategoryService {
 
     List<RoomCategory> getActiveCategoriesByHotel(Long hotelId);
 
+    //impl it later
     void deactivateCategory(Long categoryId);
 }

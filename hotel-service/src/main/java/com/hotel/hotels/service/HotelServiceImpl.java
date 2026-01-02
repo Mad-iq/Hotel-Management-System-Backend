@@ -31,6 +31,9 @@ public class HotelServiceImpl implements HotelService {
         return hotelRepository.findByActiveTrue();
     }
 
+    
+    
+    //use in the future
     @Override
     @Transactional(readOnly = true)
     public Hotel getHotelById(Long hotelId) {

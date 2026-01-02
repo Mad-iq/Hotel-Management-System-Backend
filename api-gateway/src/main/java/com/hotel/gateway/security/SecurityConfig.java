@@ -20,9 +20,7 @@ public class SecurityConfig {
             ReactiveAuthenticationManager authManager
     ) {
 
-        AuthenticationWebFilter jwtFilter =
-                new AuthenticationWebFilter(authManager);
-
+        AuthenticationWebFilter jwtFilter =new AuthenticationWebFilter(authManager);
         jwtFilter.setServerAuthenticationConverter(bearerTokenConverter());
 
         return http
@@ -32,82 +30,85 @@ public class SecurityConfig {
 
                 .authorizeExchange(exchanges -> exchanges
 
-                	    // ---------- AUTH ----------
                 	    .pathMatchers("/api/auth/**").permitAll()
 
-                	    // ---------- USER MANAGEMENT ----------
                 	    .pathMatchers(HttpMethod.POST, "/api/user", "/api/user/")
                 	        .hasRole("ADMIN")
 
-                	    // ---------- HOTELS ----------
-
-                	    // 1️⃣ Create Hotel (ADMIN)
+                	   
                 	    .pathMatchers(HttpMethod.POST, "/api/hotels", "/api/hotels/")
                 	        .hasRole("ADMIN")
 
-                	    // 2️⃣ List Hotels (PUBLIC)
                 	    .pathMatchers(HttpMethod.GET, "/api/hotels", "/api/hotels/")
                 	        .permitAll()
 
-                	    // ---------- ROOM CATEGORIES ----------
-
-                	    // 3️⃣ Create Room Category (ADMIN)
                 	    .pathMatchers(HttpMethod.POST, "/api/hotels/*/categories")
                 	        .hasRole("ADMIN")
 
-                	    // 4️⃣ List Room Categories (ADMIN / MANAGER)
                 	    .pathMatchers(HttpMethod.GET, "/api/hotels/*/categories")
                 	        .hasAnyRole("ADMIN", "MANAGER")
 
-                	    // ---------- ROOMS / INVENTORY ----------
-
-                	    // 5️⃣ Add Room to Inventory (ADMIN)
+                	 
                 	    .pathMatchers(HttpMethod.POST, "/api/hotels/*/rooms")
                 	        .hasRole("ADMIN")
 
-                	    // 6️⃣ List Rooms in Hotel (ADMIN / MANAGER)
                 	    .pathMatchers(HttpMethod.GET, "/api/hotels/*/rooms")
                 	        .hasAnyRole("ADMIN", "MANAGER")
 
-                	    // 7️⃣ Update Room Status (MANAGER)
                 	    .pathMatchers(HttpMethod.PUT, "/api/hotels/*/rooms/*/status")
-                	        .hasRole("MANAGER")
+                	        .hasAnyRole("MANAGER", "RECEPTIONIST" )
 
-                	    // ---------- PRICING ----------
-
-                	    // 8️⃣ Set Base Pricing (ADMIN)
                 	    .pathMatchers(HttpMethod.POST, "/api/categories/*/pricing")
                 	        .hasRole("ADMIN")
 
-                	    // 9️⃣ Get Base Pricing (ADMIN / MANAGER)
                 	    .pathMatchers(HttpMethod.GET, "/api/categories/*/pricing")
                 	        .hasAnyRole("ADMIN", "MANAGER")
 
-                	    // 🔟 Add Seasonal Pricing (ADMIN)
                 	    .pathMatchers(HttpMethod.POST, "/api/categories/*/seasonal-pricing")
-                	        .hasRole("ADMIN")
+                	        .hasAnyRole("ADMIN","MANAGER" )
 
-                	    // 1️⃣1️⃣ Get Seasonal Pricing (ADMIN / MANAGER)
                 	    .pathMatchers(HttpMethod.GET, "/api/categories/*/seasonal-pricing")
                 	        .hasAnyRole("ADMIN", "MANAGER")
 
-                	    // ---------- OTHER SERVICES ----------
-                	    .pathMatchers("/api/bookings/**")
-                	        .hasAnyRole("GUEST", "USER", "ADMIN")
+                	    //booking
+//                	    .pathMatchers("/api/bookings/**")
+//                	        .hasAnyRole("GUEST", "ADMIN")
                 	        
+                	    .pathMatchers(HttpMethod.POST, "/api/bookings/*/check-in")
+                	        .hasAnyRole("RECEPTIONIST", "MANAGER")
+
+                	    .pathMatchers(HttpMethod.POST, "/api/bookings/*/check-out")
+                	        .hasAnyRole("RECEPTIONIST", "MANAGER")
+                	        
+                	    .pathMatchers(HttpMethod.POST, "/api/bookings")
+                	        .hasRole("GUEST")
+
+                	    .pathMatchers(HttpMethod.DELETE, "/api/bookings/*")
+                	        .hasRole("GUEST")
+
+                	    .pathMatchers(HttpMethod.GET, "/api/bookings/user/*")
+                	        .hasRole("GUEST")
+
+                	    .pathMatchers(HttpMethod.POST, "/api/bookings/search/hotels")
+                	        .permitAll()
+                	        
+                	    .pathMatchers(HttpMethod.GET, "/api/bookings")
+                	        .hasRole("ADMIN")
+
+                        //others
                 	     .pathMatchers("/api/payments/**")
                 	        .hasRole("GUEST")
                 	        
                 	     .pathMatchers("/api/reports/**")
                 	        .hasAnyRole("ADMIN", "MANAGER")
                 	        
-                	    .pathMatchers("/api/billing/**")
-                	        .hasAnyRole("ADMIN", "MANAGER")
+//                	    .pathMatchers("/api/billing/**")
+//                	        .hasAnyRole("ADMIN", "MANAGER")
+//
+//                	    .pathMatchers("/api/reservations/**")
+//                	        .hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST", "GUEST")
 
-                	    .pathMatchers("/api/reservations/**")
-                	        .hasAnyRole("ADMIN", "MANAGER", "RECEPTIONIST", "GUEST")
-
-                	    // ---------- FALLBACK ----------
+                	    //fallback
                 	    .anyExchange().authenticated()
                 	)
 

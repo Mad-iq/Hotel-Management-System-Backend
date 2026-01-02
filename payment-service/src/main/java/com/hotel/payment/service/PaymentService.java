@@ -27,25 +27,20 @@ public class PaymentService {
     @Transactional
     public Payment createPayment(Long bookingId, Long userId) {
 
-        // 1. Prevent duplicate payment
         if (paymentRepository.existsByBookingId(bookingId)) {
             throw new IllegalStateException("Payment already exists for this booking");
         }
 
-        // 2. Fetch booking from Booking Service
         BookingResponse booking = bookingClient.getBookingById(bookingId);
 
-        // 3. Validate booking status
         if (!"CONFIRMED".equals(booking.getBookingStatus())) {
             throw new IllegalStateException("Payment allowed only for CONFIRMED bookings");
         }
 
-        // 4. Ownership check
         if (!booking.getUserId().equals(userId)) {
             throw new IllegalStateException("You are not allowed to pay for this booking");
         }
 
-        // 5. Create payment
         Payment payment = new Payment();
         payment.setBookingId(bookingId);
         payment.setUserId(userId);
@@ -61,12 +56,10 @@ public class PaymentService {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new IllegalStateException("Payment not found"));
 
-        // Ownership check
         if (!payment.getUserId().equals(userId)) {
             throw new IllegalStateException("You are not allowed to pay for this payment");
         }
 
-        // Status check
         if (payment.getStatus() != PaymentStatus.PENDING) {
             throw new IllegalStateException("Payment is already completed");
         }

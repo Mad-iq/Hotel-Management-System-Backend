@@ -11,7 +11,5 @@ public interface RoomService {
 
     List<Room> getRoomsByHotel(Long hotelId);
 
-    List<Room> getRoomsByHotelAndStatus(Long hotelId, RoomStatus status);
-
     Room updateRoomStatus(Long roomId, RoomStatus status);
 }

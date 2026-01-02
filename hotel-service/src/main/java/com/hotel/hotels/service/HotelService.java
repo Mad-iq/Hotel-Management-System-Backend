@@ -10,8 +10,9 @@ public interface HotelService {
 
     List<Hotel> getAllActiveHotels();
 
+    
+    //do this later
     Hotel getHotelById(Long hotelId);
-
     Hotel updateHotel(Long hotelId, Hotel updatedHotel);
 
     void deactivateHotel(Long hotelId);

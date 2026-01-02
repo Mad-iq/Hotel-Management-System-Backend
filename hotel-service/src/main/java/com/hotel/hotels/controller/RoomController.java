@@ -25,11 +25,9 @@ public class RoomController {
     public RoomResponseDto addRoom(
             @PathVariable Long hotelId,
             @RequestParam Long categoryId,
-            @RequestBody RoomRequestDto dto) {
-
+            @RequestBody RoomRequestDto dto){
         Room room = new Room();
         room.setRoomNumber(dto.getRoomNumber());
-
         Room saved = roomService.addRoom(hotelId, categoryId, room);
         return map(saved);
     }

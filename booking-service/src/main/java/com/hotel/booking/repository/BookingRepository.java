@@ -16,16 +16,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         SELECT b
         FROM Booking b
         WHERE b.roomId = :roomId
-          AND b.bookingStatus = :status
+          AND b.bookingStatus IN :statuses
           AND b.checkInDate < :checkOut
           AND b.checkOutDate > :checkIn
     """)
     List<Booking> findOverlappingBookings(
             @Param("roomId") Long roomId,
-            @Param("checkIn") LocalDate checkIn,
+           @Param("checkIn") LocalDate checkIn,
             @Param("checkOut") LocalDate checkOut,
-            @Param("status") BookingStatus status
-    );
+            @Param("statuses") List<BookingStatus> statuses);
     
     List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
 }

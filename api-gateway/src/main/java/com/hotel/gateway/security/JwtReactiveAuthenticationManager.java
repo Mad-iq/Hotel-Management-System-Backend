@@ -43,7 +43,7 @@ public class JwtReactiveAuthenticationManager implements ReactiveAuthenticationM
 
                     return new UsernamePasswordAuthenticationToken(
                             username,
-                            token,
+                            response,
                             authorities
                     );
                 });

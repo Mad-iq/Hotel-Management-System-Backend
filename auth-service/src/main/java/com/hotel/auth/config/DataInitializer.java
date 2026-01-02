@@ -31,25 +31,23 @@ public class DataInitializer implements CommandLineRunner {
                 "ROLE_GUEST"
         );
 
-        for (String roleName : roles) {
+        for (String roleName : roles){
             roleRepository.findByName(roleName)
-                    .orElseGet(() -> roleRepository.save(
-                            new Role(null, roleName)
-                    ));
+            .orElseGet(() -> roleRepository.save(
+               new Role(null, roleName)));
         }
 
         System.out.println("Default roles initialized");
-        
-        boolean adminExists = userRepository.findAll().stream()
+        boolean adminExists= userRepository.findAll().stream()
                 .anyMatch(user -> user.getRoles().stream()
                         .anyMatch(role -> role.getName().equals("ROLE_ADMIN")));
 
         if (!adminExists) {
 
-            Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+            Role adminRole= roleRepository.findByName("ROLE_ADMIN")
                     .orElseThrow(() -> new RuntimeException("ROLE_ADMIN not found"));
 
-            User admin = new User();
+            User admin= new User();
             admin.setUsername("admin");
             admin.setEmail("admin@hms.com");
             admin.setPassword(passwordEncoder.encode("admin123"));
@@ -59,7 +57,7 @@ public class DataInitializer implements CommandLineRunner {
 
             userRepository.save(admin);
 
-            System.out.println("✅ Default ADMIN user created");
+            System.out.println("Default ADMIN user created");
         }
 
     }

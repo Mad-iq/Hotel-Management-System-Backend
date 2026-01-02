@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hotel.booking.controller.dto.AvailableHotelDto;
 import com.hotel.booking.controller.dto.CreateBookingRequest;
+import com.hotel.booking.controller.dto.SearchHotelsRequest;
 import com.hotel.booking.entities.Booking;
 import com.hotel.booking.service.BookingService;
 
@@ -55,15 +57,8 @@ public class BookingController {
         return bookingService.cancelBooking(bookingId, userId);
     }
     
-    @GetMapping("/user/{userId}")
-    public List<Booking> getUserBookings(
-            @PathVariable Long userId,
-            @RequestHeader("X-USER-ID") Long requesterId) {
-
-        if (!userId.equals(requesterId)) {
-            throw new IllegalStateException("You can only view your own bookings");
-        }
-
+    @GetMapping("/user/mine")
+    public List<Booking> getUserBookings(@RequestHeader("X-USER-ID") Long userId){
         return bookingService.getBookingsByUser(userId);
     }
     
@@ -71,4 +66,24 @@ public class BookingController {
     public List<Booking> getAllBookings() {
         return bookingService.getAllBookings();
     }
+    
+    @PostMapping("/search/hotels")
+    public List<AvailableHotelDto> searchAvailableHotels(@Valid @RequestBody SearchHotelsRequest request){
+        return bookingService.searchAvailableHotels(
+                request.getCity(),
+                 request.getCheckIn(),
+                 request.getCheckOut(),
+                request.getGuests());
+    }
+    
+    @PostMapping("/{bookingId}/check-in")
+    public Booking checkIn(@PathVariable Long bookingId){
+        return bookingService.checkIn(bookingId);
+    }
+
+    @PostMapping("/{bookingId}/check-out")
+    public Booking checkOut(@PathVariable Long bookingId){
+        return bookingService.checkOut(bookingId);
+    }
+
 }

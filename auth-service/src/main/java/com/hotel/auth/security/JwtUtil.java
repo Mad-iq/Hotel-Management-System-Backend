@@ -23,10 +23,11 @@ public class JwtUtil {
         this.expiration = expiration;
     }
 
-    public String generateToken(String username, List<String> roles) {
+    public String generateToken(Long userId, String username, List<String> roles) {
 
         return Jwts.builder()
                 .setSubject(username)
+                .claim("userId", userId)
                 .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))

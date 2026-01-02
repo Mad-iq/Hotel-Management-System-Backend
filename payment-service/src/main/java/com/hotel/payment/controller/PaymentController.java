@@ -22,7 +22,6 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    // 1️⃣ Create payment for a booking
     @PostMapping
     public Payment createPayment(
             @RequestParam Long bookingId,
@@ -31,7 +30,6 @@ public class PaymentController {
         return paymentService.createPayment(bookingId, userId);
     }
 
-    // 2️⃣ Mark payment as PAID
     @PutMapping("/{paymentId}/pay")
     public Payment pay(
             @PathVariable Long paymentId,
@@ -40,7 +38,6 @@ public class PaymentController {
         return paymentService.markPaymentAsPaid(paymentId, userId);
     }
 
-    // 3️⃣ Get payment by booking
     @GetMapping("/booking/{bookingId}")
     public Payment getPaymentByBooking(
             @PathVariable Long bookingId,

@@ -67,7 +67,7 @@ public class AuthService {
                 .map(role -> role.getName())
                 .toList();
 
-        String token = jwtUtil.generateToken(user.getUsername(), roles);
+        String token = jwtUtil.generateToken(user.getId(),user.getUsername(), roles);
 
         return new LoginResponse(
                 token,

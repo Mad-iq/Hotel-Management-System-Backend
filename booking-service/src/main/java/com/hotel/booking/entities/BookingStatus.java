@@ -2,5 +2,8 @@ package com.hotel.booking.entities;
 
 public enum BookingStatus {
     CONFIRMED,
-    CANCELLED
+    CANCELLED,
+    CHECKED_IN,
+    CHECKED_OUT,
+    NO_SHOW
 }

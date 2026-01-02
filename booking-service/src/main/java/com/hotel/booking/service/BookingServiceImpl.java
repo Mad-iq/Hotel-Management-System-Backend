@@ -8,16 +8,20 @@ import org.springframework.stereotype.Service;
 
 import com.hotel.booking.client.HotelServiceClient;
 import com.hotel.booking.client.dto.CategoryPricingDto;
+import com.hotel.booking.client.dto.HotelDto;
 import com.hotel.booking.client.dto.RoomDto;
 import com.hotel.booking.client.dto.SeasonalPricingDto;
+import com.hotel.booking.controller.dto.AvailableHotelDto;
 import com.hotel.booking.entities.Booking;
 import com.hotel.booking.entities.BookingStatus;
 import com.hotel.booking.event.BookingEventPublisher;
 import com.hotel.booking.event.dto.BookingCreatedEvent;
 import com.hotel.booking.repository.BookingRepository;
 
-@Service
+import lombok.extern.slf4j.Slf4j;
 
+@Service
+@Slf4j
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
@@ -26,49 +30,29 @@ public class BookingServiceImpl implements BookingService {
 
     public BookingServiceImpl(
             BookingRepository bookingRepository,
-            HotelServiceClient hotelServiceClient,  BookingEventPublisher bookingEventPublisher) {
+            HotelServiceClient hotelServiceClient,  BookingEventPublisher bookingEventPublisher){
         this.bookingRepository = bookingRepository;
         this.hotelServiceClient = hotelServiceClient;
         this.bookingEventPublisher = bookingEventPublisher;
     }
 
-
     @Override
-    public Booking createBooking(
-            Long userId,
-            Long hotelId,
-            Long roomId,
-            LocalDate checkIn,
-            LocalDate checkOut) {
-
+    public Booking createBooking(Long userId,Long hotelId,Long roomId,LocalDate checkIn, LocalDate checkOut){
         List<RoomDto> rooms = hotelServiceClient.getRoomsByHotel(hotelId);
-
         RoomDto room = rooms.stream()
                 .filter(r -> r.getId().equals(roomId))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Room not found in this hotel"));
 
-        if (!"AVAILABLE".equals(room.getStatus())) {
-            throw new IllegalStateException("Room is not available");
+        if ("MAINTENANCE".equals(room.getStatus())) {
+            throw new IllegalStateException("Room is under maintenance");
         }
-
-        boolean hasOverlap =
-                !bookingRepository.findOverlappingBookings(
-                        roomId,
-                        checkIn,
-                        checkOut,
-                        BookingStatus.CONFIRMED
-                ).isEmpty();
-
-        if (hasOverlap) {
+        boolean hasOverlap = !bookingRepository.findOverlappingBookings(roomId,checkIn,checkOut,List.of(BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN)).isEmpty();
+        if (hasOverlap){
             throw new IllegalStateException("Room is already booked for the given dates");
         }
 
-        BigDecimal totalAmount = calculatePrice(
-                room.getCategoryId(),
-                checkIn,
-                checkOut
-        );
+        BigDecimal totalAmount = calculatePrice(room.getCategoryId(),checkIn,checkOut);
 
         Booking booking = new Booking();
         booking.setUserId(userId);
@@ -78,10 +62,8 @@ public class BookingServiceImpl implements BookingService {
         booking.setCheckOutDate(checkOut);
         booking.setTotalAmount(totalAmount);
         booking.setBookingStatus(BookingStatus.CONFIRMED);
-
         Booking savedBooking = bookingRepository.save(booking);
-
-        hotelServiceClient.updateRoomStatus(hotelId, roomId, "OCCUPIED");
+        //hotelServiceClient.updateRoomStatus(hotelId, roomId, "OCCUPIED");
         
         BookingCreatedEvent event = new BookingCreatedEvent();
         event.setBookingId(savedBooking.getId());
@@ -93,8 +75,11 @@ public class BookingServiceImpl implements BookingService {
         event.setTotalAmount(savedBooking.getTotalAmount());
         event.setCreatedAt(savedBooking.getCreatedAt());
 
-        bookingEventPublisher.publishBookingCreated(event);
-
+        try {
+            bookingEventPublisher.publishBookingCreated(event);
+        } catch (Exception e) {
+            log.error("Booking {} created but Kafka publish failed",savedBooking.getId(),e);
+        }
         return savedBooking;
     }
 
@@ -122,7 +107,6 @@ public class BookingServiceImpl implements BookingService {
                 booking.getRoomId(),
                 "AVAILABLE"
         );
-        
         return savedBooking;
     }
 
@@ -142,11 +126,9 @@ public class BookingServiceImpl implements BookingService {
 
         BigDecimal pricePerNight = basePricing.getBasePrice();
 
-        // Optional seasonal override (simple version)
-        List<SeasonalPricingDto> seasonalPrices =
-                hotelServiceClient.getSeasonalPricing(categoryId, checkIn);
-
-        if (!seasonalPrices.isEmpty()) {
+        // Optional seasonal override
+        List<SeasonalPricingDto> seasonalPrices =hotelServiceClient.getSeasonalPricing(categoryId, checkIn);
+        if (!seasonalPrices.isEmpty()){
             pricePerNight = seasonalPrices.get(0).getPrice();
         }
 
@@ -162,4 +144,67 @@ public class BookingServiceImpl implements BookingService {
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
     }
+    
+    //search logic
+    @Override
+    public List<AvailableHotelDto> searchAvailableHotels(String city,LocalDate checkIn,LocalDate checkOut,Integer guests){
+        if (!checkIn.isBefore(checkOut)) {
+            throw new IllegalArgumentException("Check-in must be before check-out");
+        }
+
+        List<HotelDto> hotels = hotelServiceClient.getAllHotels();
+        return hotels.stream().filter(h -> h.getCity().equalsIgnoreCase(city))
+                .map(hotel -> {
+                    List<RoomDto> rooms =hotelServiceClient.getRoomsByHotel(hotel.getId());
+                    long availableRooms = rooms.stream()
+                            .filter(room -> !"MAINTENANCE".equals(room.getStatus()))
+                            .filter(room -> {
+                                boolean hasOverlap =!bookingRepository.findOverlappingBookings(room.getId(),checkIn,checkOut,List.of(BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN)).isEmpty();
+                               return !hasOverlap;
+                            }).count();
+
+                    if (availableRooms > 0){
+                        AvailableHotelDto dto = new AvailableHotelDto();
+                         dto.setHotelId(hotel.getId());
+                         dto.setName(hotel.getName());
+                        dto.setCity(hotel.getCity());
+                        dto.setStarRating(hotel.getStarRating());
+                        dto.setAvailableRooms((int) availableRooms);
+                        return dto;}
+                    return null;
+                    }).filter(dto -> dto != null).toList();
+        }
+    
+    @Override
+    public Booking checkIn(Long bookingId) {
+        Booking booking = getBookingById(bookingId);
+        if (booking.getBookingStatus() != BookingStatus.CONFIRMED) {
+            throw new IllegalStateException("Only confirmed bookings can be checked in");
+        }
+
+        if (!LocalDate.now().isEqual(booking.getCheckInDate())) {
+            throw new IllegalStateException("Check-in allowed only on check-in date");
+        }
+
+        booking.setBookingStatus(BookingStatus.CHECKED_IN);
+        Booking savedBooking = bookingRepository.save(booking);
+        hotelServiceClient.updateRoomStatus(booking.getHotelId(),booking.getRoomId(),"OCCUPIED");
+        return savedBooking;
+    }
+    
+    @Override
+    public Booking checkOut(Long bookingId) {
+        Booking booking = getBookingById(bookingId);
+        if (booking.getBookingStatus() != BookingStatus.CHECKED_IN){
+            throw new IllegalStateException("Only checked-in bookings can be checked out");
+        }
+
+        booking.setBookingStatus(BookingStatus.CHECKED_OUT);
+        Booking savedBooking = bookingRepository.save(booking);
+        hotelServiceClient.updateRoomStatus( booking.getHotelId(),booking.getRoomId(),"AVAILABLE");
+        return savedBooking;
+    }
+
+
+
 }

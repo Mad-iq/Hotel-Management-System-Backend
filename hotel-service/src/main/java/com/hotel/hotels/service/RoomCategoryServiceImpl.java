@@ -25,13 +25,10 @@ public class RoomCategoryServiceImpl implements RoomCategoryService {
 
     @Override
     public RoomCategory createCategory(Long hotelId, RoomCategory category) {
-        Hotel hotel = hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new RuntimeException("Hotel not found"));
-
+        Hotel hotel = hotelRepository.findById(hotelId).orElseThrow(() -> new RuntimeException("Hotel not found"));
         category.setId(null);
         category.setHotel(hotel);
         category.setActive(true);
-
         return categoryRepository.save(category);
     }
 
