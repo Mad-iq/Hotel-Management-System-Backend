@@ -27,15 +27,12 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // From JWT (user making the booking)
     @Column(nullable = false)
     private Long userId;
 
-    // Hotel Service reference
     @Column(nullable = false)
     private Long hotelId;
 
-    // Room Service reference (via Hotel Service)
     @Column(nullable = false)
     private Long roomId;
 
@@ -45,7 +42,6 @@ public class Booking {
     @Column(nullable = false)
     private LocalDate checkOutDate;
 
-    // Snapshot of price at booking time
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 

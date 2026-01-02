@@ -27,17 +27,13 @@ public class NoShowScheduler {
 
     //this runs at 12:30 everyday
     @Transactional
-//    @Scheduled(cron = "0 30 0 * * ?")
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 30 0 * * ?")
     public void markNoShows() {
 
         LocalDate today = LocalDate.now();
 
         List<Booking> noShowBookings =
-                bookingRepository.findNoShowCandidates(
-                        BookingStatus.CONFIRMED,
-                        today
-                );
+                bookingRepository.findNoShowCandidates(BookingStatus.CONFIRMED,today);
 
         for (Booking booking : noShowBookings) {	
             booking.setBookingStatus(BookingStatus.NO_SHOW);

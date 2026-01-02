@@ -65,21 +65,21 @@ public class BookingServiceImpl implements BookingService {
         Booking savedBooking = bookingRepository.save(booking);
         //hotelServiceClient.updateRoomStatus(hotelId, roomId, "OCCUPIED");
         
-//        BookingCreatedEvent event = new BookingCreatedEvent();
-//        event.setBookingId(savedBooking.getId());
-//        event.setUserId(savedBooking.getUserId());
-//        event.setHotelId(savedBooking.getHotelId());
-//        event.setRoomId(savedBooking.getRoomId());
-//        event.setCheckInDate(savedBooking.getCheckInDate());
-//        event.setCheckOutDate(savedBooking.getCheckOutDate());
-//        event.setTotalAmount(savedBooking.getTotalAmount());
-//        event.setCreatedAt(savedBooking.getCreatedAt());
-//
-//        try {
-//            bookingEventPublisher.publishBookingCreated(event);
-//        } catch (Exception e) {
-//            log.error("Booking {} created but Kafka publish failed",savedBooking.getId(),e);
-//        }
+        BookingCreatedEvent event = new BookingCreatedEvent();
+        event.setBookingId(savedBooking.getId());
+        event.setUserId(savedBooking.getUserId());
+        event.setHotelId(savedBooking.getHotelId());
+        event.setRoomId(savedBooking.getRoomId());
+        event.setCheckInDate(savedBooking.getCheckInDate());
+        event.setCheckOutDate(savedBooking.getCheckOutDate());
+        event.setTotalAmount(savedBooking.getTotalAmount());
+        event.setCreatedAt(savedBooking.getCreatedAt());
+
+        try {
+            bookingEventPublisher.publishBookingCreated(event);
+        } catch (Exception e) {
+            log.error("Booking {} created but Kafka publish failed",savedBooking.getId(),e);
+        }
         return savedBooking;
     }
 
@@ -156,20 +156,27 @@ public class BookingServiceImpl implements BookingService {
         return hotels.stream().filter(h -> h.getCity().equalsIgnoreCase(city))
                 .map(hotel -> {
                     List<RoomDto> rooms =hotelServiceClient.getRoomsByHotel(hotel.getId());
-                    long availableRooms = rooms.stream()
+                    List<RoomDto> availableRoomList = rooms.stream()
                             .filter(room -> !"MAINTENANCE".equals(room.getStatus()))
                             .filter(room -> {
                                 boolean hasOverlap =!bookingRepository.findOverlappingBookings(room.getId(),checkIn,checkOut,List.of(BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN)).isEmpty();
                                return !hasOverlap;
-                            }).count();
+                            }).toList();
+
+                    int availableRooms = availableRoomList.size();
 
                     if (availableRooms > 0){
+                        BigDecimal startingFromPrice = availableRoomList.stream().map(room ->
+                             calculatePrice(room.getCategoryId(),checkIn,checkOut))
+                            .min(BigDecimal::compareTo)
+                            .orElse(null);
                         AvailableHotelDto dto = new AvailableHotelDto();
                          dto.setHotelId(hotel.getId());
                          dto.setName(hotel.getName());
                         dto.setCity(hotel.getCity());
                         dto.setStarRating(hotel.getStarRating());
                         dto.setAvailableRooms((int) availableRooms);
+                        dto.setStartingFromPrice(startingFromPrice);
                         return dto;}
                     return null;
                     }).filter(dto -> dto != null).toList();
