@@ -46,4 +46,10 @@ public class AuthController {
         String token = authHeader.replace("Bearer ", "");
         return jwtUtil.validateToken(token);
     }
+    
+    @GetMapping("/profile")
+    public com.hotel.auth.dto.ProfileResponse profile() {
+        return authService.getProfile();
+    }
+
 }

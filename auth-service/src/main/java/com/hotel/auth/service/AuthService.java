@@ -4,10 +4,12 @@ import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.hotel.auth.dto.CreateStaffUserRequest;
 import com.hotel.auth.dto.LoginRequest;
 import com.hotel.auth.dto.LoginResponse;
+import com.hotel.auth.dto.ProfileResponse;
 import com.hotel.auth.dto.RegisterRequest;
 import com.hotel.auth.entity.Role;
 import com.hotel.auth.entity.User;
@@ -106,5 +108,37 @@ public class AuthService {
 
         userRepository.save(user);
     }
+    
+    
+    public ProfileResponse getProfile() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new IllegalStateException("Unauthenticated");
+        }
+
+        Long userId = (Long) authentication.getPrincipal();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        ProfileResponse response = new ProfileResponse();
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setEmail(user.getEmail());
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
+        response.setRoles(
+                user.getRoles()
+                        .stream()
+                        .map(role -> role.getName())
+                        .collect(java.util.stream.Collectors.toSet())
+        );
+
+        return response;
+    }
+
 
 }
