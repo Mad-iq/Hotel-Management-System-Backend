@@ -27,4 +27,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("statuses") List<BookingStatus> statuses);
     
     List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
+    
+    @Query("""
+    	    SELECT b
+    	    FROM Booking b
+    	    WHERE b.bookingStatus = :status
+    	      AND b.checkInDate < :today
+    	""")
+    	List<Booking> findNoShowCandidates(
+    	        @Param("status") BookingStatus status,
+    	         @Param("today") LocalDate today);
+
 }

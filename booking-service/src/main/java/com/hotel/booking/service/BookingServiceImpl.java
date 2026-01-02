@@ -65,21 +65,21 @@ public class BookingServiceImpl implements BookingService {
         Booking savedBooking = bookingRepository.save(booking);
         //hotelServiceClient.updateRoomStatus(hotelId, roomId, "OCCUPIED");
         
-        BookingCreatedEvent event = new BookingCreatedEvent();
-        event.setBookingId(savedBooking.getId());
-        event.setUserId(savedBooking.getUserId());
-        event.setHotelId(savedBooking.getHotelId());
-        event.setRoomId(savedBooking.getRoomId());
-        event.setCheckInDate(savedBooking.getCheckInDate());
-        event.setCheckOutDate(savedBooking.getCheckOutDate());
-        event.setTotalAmount(savedBooking.getTotalAmount());
-        event.setCreatedAt(savedBooking.getCreatedAt());
-
-        try {
-            bookingEventPublisher.publishBookingCreated(event);
-        } catch (Exception e) {
-            log.error("Booking {} created but Kafka publish failed",savedBooking.getId(),e);
-        }
+//        BookingCreatedEvent event = new BookingCreatedEvent();
+//        event.setBookingId(savedBooking.getId());
+//        event.setUserId(savedBooking.getUserId());
+//        event.setHotelId(savedBooking.getHotelId());
+//        event.setRoomId(savedBooking.getRoomId());
+//        event.setCheckInDate(savedBooking.getCheckInDate());
+//        event.setCheckOutDate(savedBooking.getCheckOutDate());
+//        event.setTotalAmount(savedBooking.getTotalAmount());
+//        event.setCreatedAt(savedBooking.getCreatedAt());
+//
+//        try {
+//            bookingEventPublisher.publishBookingCreated(event);
+//        } catch (Exception e) {
+//            log.error("Booking {} created but Kafka publish failed",savedBooking.getId(),e);
+//        }
         return savedBooking;
     }
 
