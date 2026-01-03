@@ -18,6 +18,7 @@ import com.hotel.booking.entities.Booking;
 import com.hotel.booking.service.BookingService;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -32,10 +33,12 @@ public class BookingController {
     @PostMapping
     public Booking createBooking(
             @RequestHeader("X-USER-ID") Long userId,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
             @Valid @RequestBody CreateBookingRequest request) {
 
         return bookingService.createBooking(
                 userId,
+                authHeader,
                 request.getHotelId(),
                 request.getRoomId(),
                 request.getCheckIn(),

@@ -1,6 +1,8 @@
 package com.hotel.booking.service;
 
 import java.math.BigDecimal;
+import com.hotel.booking.client.AuthServiceClient;
+import com.hotel.booking.client.dto.UserProfileDto;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -27,17 +29,22 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final HotelServiceClient hotelServiceClient;
     private final BookingEventPublisher bookingEventPublisher;
+    private final AuthServiceClient authServiceClient;
 
     public BookingServiceImpl(
             BookingRepository bookingRepository,
-            HotelServiceClient hotelServiceClient,  BookingEventPublisher bookingEventPublisher){
+            HotelServiceClient hotelServiceClient, AuthServiceClient authServiceClient, BookingEventPublisher bookingEventPublisher){
         this.bookingRepository = bookingRepository;
         this.hotelServiceClient = hotelServiceClient;
+        this.authServiceClient = authServiceClient;
         this.bookingEventPublisher = bookingEventPublisher;
     }
 
     @Override
-    public Booking createBooking(Long userId,Long hotelId,Long roomId,LocalDate checkIn, LocalDate checkOut){
+    public Booking createBooking(Long userId, String authHeader,Long hotelId,Long roomId,LocalDate checkIn, LocalDate checkOut){
+    	UserProfileDto userProfile =authServiceClient.getProfile(authHeader);
+        String userEmail = userProfile.getEmail();
+        
         List<RoomDto> rooms = hotelServiceClient.getRoomsByHotel(hotelId);
         RoomDto room = rooms.stream()
                 .filter(r -> r.getId().equals(roomId))
@@ -68,6 +75,7 @@ public class BookingServiceImpl implements BookingService {
         BookingCreatedEvent event = new BookingCreatedEvent();
         event.setBookingId(savedBooking.getId());
         event.setUserId(savedBooking.getUserId());
+        event.setUserEmail(userEmail);
         event.setHotelId(savedBooking.getHotelId());
         event.setRoomId(savedBooking.getRoomId());
         event.setCheckInDate(savedBooking.getCheckInDate());

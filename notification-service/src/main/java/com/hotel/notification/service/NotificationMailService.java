@@ -19,7 +19,7 @@ public class NotificationMailService {
     public void sendBookingConfirmation(BookingCreatedEvent event) {
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo("debashritamandal852@gmail.com");
+        message.setTo(event.getUserEmail());
         message.setSubject("Booking Confirmation");
         message.setText(
             "Booking confirmed!\n\n" +
