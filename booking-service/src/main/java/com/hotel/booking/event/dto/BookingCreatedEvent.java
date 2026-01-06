@@ -17,4 +17,5 @@ public class BookingCreatedEvent {
     private LocalDate checkOutDate;
     private BigDecimal totalAmount;
     private LocalDateTime createdAt;
+    private String userEmail;
 }
