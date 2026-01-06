@@ -7,7 +7,6 @@ services:
   service-registry:
     build:
       context: ./Service-Registry
-    container_name: service-registry
     ports:
       - "8761:8761"
     healthcheck:
@@ -20,7 +19,6 @@ services:
   config-server:
     build:
       context: ./config-server
-    container_name: config-server
     ports:
       - "8888:8888"
     environment:
@@ -37,7 +35,6 @@ services:
 
   mysql:
     image: mysql:8.4
-    container_name: mysql
     ports:
       - "3306:3306"
     environment:
@@ -53,13 +50,11 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
-    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
 
   kafka:
     image: confluentinc/cp-kafka:7.6.1
-    container_name: kafka
     ports:
       - "9092:9092"
     environment:
@@ -82,7 +77,6 @@ services:
   auth-service:
     build:
       context: ./auth-service
-    container_name: auth-service
     ports:
       - "8081:8081"
     environment:
@@ -98,7 +92,6 @@ services:
   api-gateway:
     build:
       context: ./api-gateway
-    container_name: api-gateway
     ports:
       - "8080:8080"
     environment:
@@ -114,7 +107,6 @@ services:
   hotel-service:
     build:
       context: ./hotel-service
-    container_name: hotel-service
     ports:
       - "8083:8083"
     environment:
@@ -130,7 +122,6 @@ services:
   booking-service:
     build:
       context: ./booking-service
-    container_name: booking-service
     ports:
       - "8084:8084"
     environment:
@@ -148,7 +139,6 @@ services:
   notification-service:
     build:
       context: ./notification-service
-    container_name: notification-service
     ports:
       - "8082:8082"
     environment:
@@ -162,7 +152,6 @@ services:
   payment-service:
     build:
       context: ./payment-service
-    container_name: payment-service
     ports:
       - "8085:8085"
     environment:
@@ -178,7 +167,6 @@ services:
   report-service:
     build:
       context: ./report-service
-    container_name: report-service
     ports:
       - "8086:8086"
     environment:
