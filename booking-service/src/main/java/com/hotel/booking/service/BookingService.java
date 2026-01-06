@@ -10,6 +10,7 @@ public interface BookingService {
 
     Booking createBooking(
             Long userId,
+            String authHeader,
             Long hotelId,
             Long roomId,
             LocalDate checkIn,

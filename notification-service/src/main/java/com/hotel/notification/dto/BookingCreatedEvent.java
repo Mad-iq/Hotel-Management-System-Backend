@@ -11,13 +11,11 @@ public class BookingCreatedEvent {
 
     private Long bookingId;
     private Long userId;
+    private String userEmail;
     private Long hotelId;
     private Long roomId;
-
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
-
     private BigDecimal totalAmount;
-
     private LocalDateTime createdAt;
 }
