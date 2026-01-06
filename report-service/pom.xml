@@ -28,6 +28,10 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<sonar.projectKey>hotel-report-service</sonar.projectKey>
+        <sonar.projectName>Hotel Report Service</sonar.projectName>
+        <sonar.organization>mad-iq</sonar.organization>
+        <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -80,6 +84,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
+				   <source>17</source>
+                    <target>17</target>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
@@ -100,6 +106,36 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>0.8.11</version>
+    <executions>
+
+        <!-- Attach JaCoCo agent before tests -->
+        <execution>
+            <id>prepare-agent</id>
+            <goals>
+                <goal>prepare-agent</goal>
+            </goals>
+        </execution>
+
+        <!-- Generate report after tests -->
+        <execution>
+            <id>report</id>
+            <phase>verify</phase>
+            <goals>
+                <goal>report</goal>
+            </goals>
+        </execution>
+
+    </executions>
+</plugin>
+<plugin>
+    <groupId>org.sonarsource.scanner.maven</groupId>
+    <artifactId>sonar-maven-plugin</artifactId>
+    <version>3.10.0.2594</version>
+</plugin>
 		</plugins>
 	</build>
 

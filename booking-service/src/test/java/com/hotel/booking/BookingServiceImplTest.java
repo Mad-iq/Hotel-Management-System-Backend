@@ -166,4 +166,77 @@ class BookingServiceImplTest {
                 bookingService.checkIn(1L)
         );
     }
+    
+    @Test
+    void createBooking_roomUnderMaintenance_shouldThrowException() {
+        room.setStatus("MAINTENANCE");
+
+        when(authServiceClient.getProfile(anyString()))
+                .thenReturn(new UserProfileDto());
+        when(hotelServiceClient.getRoomsByHotel(1L))
+                .thenReturn(List.of(room));
+
+        assertThrows(IllegalStateException.class, () ->
+                bookingService.createBooking(
+                        1L,
+                        "Bearer token",
+                        1L,
+                        1L,
+                        LocalDate.now().plusDays(1),
+                        LocalDate.now().plusDays(2)
+                )
+        );
+    }
+    
+    @Test
+    void cancelBooking_wrongUser_shouldThrowException() {
+        Booking booking = new Booking();
+        booking.setId(1L);
+        booking.setUserId(99L); // different user
+
+        when(bookingRepository.findById(1L))
+                .thenReturn(Optional.of(booking));
+        when(authServiceClient.getProfile(anyString()))
+                .thenReturn(new UserProfileDto());
+
+        assertThrows(IllegalStateException.class, () ->
+                bookingService.cancelBooking(1L, 1L, "Bearer token")
+        );
+    }
+
+    @Test
+    void checkIn_success() {
+        Booking booking = new Booking();
+        booking.setId(1L);
+        booking.setHotelId(1L);
+        booking.setRoomId(1L);
+        booking.setBookingStatus(BookingStatus.CONFIRMED);
+        booking.setCheckInDate(LocalDate.now());
+
+        when(bookingRepository.findById(1L))
+                .thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any()))
+                .thenAnswer(i -> i.getArgument(0));
+
+        Booking checkedIn = bookingService.checkIn(1L);
+
+        assertEquals(BookingStatus.CHECKED_IN, checkedIn.getBookingStatus());
+        verify(hotelServiceClient)
+                .updateRoomStatus(1L, 1L, "OCCUPIED");
+    }
+
+    @Test
+    void checkOut_notCheckedIn_shouldThrowException() {
+        Booking booking = new Booking();
+        booking.setBookingStatus(BookingStatus.CONFIRMED);
+
+        when(bookingRepository.findById(1L))
+                .thenReturn(Optional.of(booking));
+
+        assertThrows(IllegalStateException.class, () ->
+                bookingService.checkOut(1L)
+        );
+    }
+
+
 }
