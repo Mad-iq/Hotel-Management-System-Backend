@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.hotel.booking.client.dto.CategoryPricingDto;
 import com.hotel.booking.client.dto.HotelDto;
+import com.hotel.booking.client.dto.RoomCategoryDto;
 import com.hotel.booking.client.dto.RoomDto;
 import com.hotel.booking.client.dto.SeasonalPricingDto;
 
@@ -40,5 +41,9 @@ public interface HotelServiceClient {
     //adding this for the search
     @GetMapping("/api/hotels")
     List<HotelDto> getAllHotels();
+    
+    //added this for room search
+    @GetMapping("/api/hotels/{hotelId}/categories")
+    List<RoomCategoryDto> getCategoriesByHotel(@PathVariable Long hotelId);
 }
 

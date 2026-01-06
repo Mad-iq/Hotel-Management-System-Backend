@@ -37,5 +37,27 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     	List<Booking> findNoShowCandidates(
     	        @Param("status") BookingStatus status,
     	         @Param("today") LocalDate today);
+    
+    @Query("""
+    	    SELECT b
+    	    FROM Booking b
+    	    WHERE b.bookingStatus = :status
+    	      AND b.checkInDate = :reminderDate
+    	""")
+    	List<Booking> findCheckInReminderCandidates(
+    	        @Param("status") BookingStatus status,
+    	        @Param("reminderDate") LocalDate reminderDate
+    	);
+    
+    @Query("""
+    	    SELECT b
+    	    FROM Booking b
+    	    WHERE b.bookingStatus = :status
+    	      AND b.checkOutDate = :today
+    	""")
+    	List<Booking> findCheckOutReminderCandidates(
+    	        @Param("status") BookingStatus status,
+    	        @Param("today") LocalDate today
+    	);
 
 }

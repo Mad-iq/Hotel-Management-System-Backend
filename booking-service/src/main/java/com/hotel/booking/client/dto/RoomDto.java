@@ -10,5 +10,5 @@ public class RoomDto {
     private Long id;
     private Long hotelId;
     private Long categoryId;
-    private String status; // AVAILABLE, OCCUPIED, MAINTENANCE
+    private String status; // AVAILABLE,OCCUPIED, MAINTENANce
 }

@@ -2,6 +2,7 @@ package com.hotel.auth.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hotel.auth.dto.InternalUserProfileDto;
 import com.hotel.auth.dto.LoginRequest;
 import com.hotel.auth.dto.LoginResponse;
 import com.hotel.auth.dto.RegisterRequest;
@@ -50,6 +52,11 @@ public class AuthController {
     @GetMapping("/profile")
     public com.hotel.auth.dto.ProfileResponse profile() {
         return authService.getProfile();
+    }
+    
+    @GetMapping("/internal/users/{userId}")
+    public InternalUserProfileDto getUserById(@PathVariable Long userId) {
+        return authService.getUserProfileById(userId);
     }
 
 }

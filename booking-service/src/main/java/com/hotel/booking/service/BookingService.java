@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.hotel.booking.controller.dto.AvailableHotelDto;
+import com.hotel.booking.controller.dto.AvailableRoomsByCategoryDto;
 import com.hotel.booking.entities.Booking;
 
 public interface BookingService {
@@ -19,7 +20,7 @@ public interface BookingService {
 
     Booking getBookingById(Long bookingId);
 
-    Booking cancelBooking(Long bookingId, Long userId);
+    Booking cancelBooking(Long bookingId, Long userId,String authHeader);
 
     List<Booking> getBookingsByUser(Long userId);
     
@@ -35,4 +36,12 @@ public interface BookingService {
     //for receptionist
     Booking checkIn(Long bookingId);
     Booking checkOut(Long bookingId);
+    
+    List<AvailableRoomsByCategoryDto> getAvailableRoomsByCategory(
+    	    Long hotelId,
+    	    LocalDate checkIn,
+    	    LocalDate checkOut,
+    	    Integer guests
+    	);
+
 }

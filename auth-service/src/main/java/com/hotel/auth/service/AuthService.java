@@ -2,11 +2,14 @@ package com.hotel.auth.service;
 
 import java.util.Set;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.hotel.auth.dto.CreateStaffUserRequest;
+import com.hotel.auth.dto.InternalUserProfileDto;
 import com.hotel.auth.dto.LoginRequest;
 import com.hotel.auth.dto.LoginResponse;
 import com.hotel.auth.dto.ProfileResponse;
@@ -58,10 +61,10 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
 
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+                .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid username or password");
+            throw new BadCredentialsException("Invalid username or password");
         }
 
         var roles = user.getRoles()
@@ -139,6 +142,19 @@ public class AuthService {
 
         return response;
     }
+    
+    public InternalUserProfileDto getUserProfileById(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        InternalUserProfileDto dto = new InternalUserProfileDto();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+
+        return dto;
+    }
+
 
 
 }

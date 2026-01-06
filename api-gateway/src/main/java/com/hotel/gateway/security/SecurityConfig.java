@@ -30,6 +30,7 @@ public class SecurityConfig {
 
                 .authorizeExchange(exchanges -> exchanges
 
+                		.pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 	    .pathMatchers("/api/auth/**").permitAll()
 
                 	    .pathMatchers(HttpMethod.POST, "/api/user", "/api/user/")
@@ -46,14 +47,14 @@ public class SecurityConfig {
                 	        .hasRole("ADMIN")
 
                 	    .pathMatchers(HttpMethod.GET, "/api/hotels/*/categories")
-                	        .hasAnyRole("ADMIN", "MANAGER")
+                	        .permitAll()
 
                 	 
                 	    .pathMatchers(HttpMethod.POST, "/api/hotels/*/rooms")
                 	        .hasRole("ADMIN")
 
                 	    .pathMatchers(HttpMethod.GET, "/api/hotels/*/rooms")
-                	        .hasAnyRole("ADMIN", "MANAGER")
+                	         .permitAll()
 
                 	    .pathMatchers(HttpMethod.PUT, "/api/hotels/*/rooms/*/status")
                 	        .hasAnyRole("MANAGER", "RECEPTIONIST" )
@@ -73,13 +74,12 @@ public class SecurityConfig {
                 	    //booking
 //                	    .pathMatchers("/api/bookings/**")
 //                	        .hasAnyRole("GUEST", "ADMIN")
-                	        
                 	    .pathMatchers(HttpMethod.POST, "/api/bookings/*/check-in")
                 	        .hasAnyRole("RECEPTIONIST", "MANAGER")
 
                 	    .pathMatchers(HttpMethod.POST, "/api/bookings/*/check-out")
                 	        .hasAnyRole("RECEPTIONIST", "MANAGER")
-                	        
+
                 	    .pathMatchers(HttpMethod.POST, "/api/bookings")
                 	        .hasRole("GUEST")
 
@@ -91,16 +91,20 @@ public class SecurityConfig {
 
                 	    .pathMatchers(HttpMethod.POST, "/api/bookings/search/hotels")
                 	        .permitAll()
-                	        
+
+                	    .pathMatchers(HttpMethod.GET, "/api/bookings/available-rooms")
+                	        .permitAll()
+
                 	    .pathMatchers(HttpMethod.GET, "/api/bookings")
                 	        .hasRole("ADMIN")
+
 
                         //others
                 	     .pathMatchers("/api/payments/**")
                 	        .hasRole("GUEST")
                 	        
                 	     .pathMatchers("/api/reports/**")
-                	        .hasAnyRole("ADMIN", "MANAGER")
+                	        .hasRole("ADMIN")
                 	        
 //                	    .pathMatchers("/api/billing/**")
 //                	        .hasAnyRole("ADMIN", "MANAGER")
